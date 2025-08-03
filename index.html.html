@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Arabic Beehive Game</title>
+    <style>
+        body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* Added vertical centering */
+        background: #1F2935;
+        margin: 0;
+        min-height: 100vh;
+        font-family: Tajawal, sans-serif;
+        direction: rtl;
+    }
+
+    #grid {
+        display: flex;
+        flex-direction: column;
+        gap: -25px;
+        margin-bottom: 0;
+    }
+
+    .row {
+        display: flex;
+        gap: 7px;
+        position: relative;
+        margin-top: -14px;
+    }
+
+        .row:nth-child(even) {
+            transform: translateX(38.5px);
+        }
+
+        .cell {
+            width: 70px;
+            height: 80px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 30px;
+            color: black;
+            background-color: #F1F1F1;
+            transition: background-color 0.3s;
+        }
+
+        .green { background-color: #5CB338 !important; }
+        .red { background-color: #f44336 !important; }
+
+        button {
+        padding: 12px 25px;
+        font-size: 18px;
+        cursor: pointer;
+        background: #1E98D7;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-top: 50px;
+    }
+
+        button:hover {
+            background: #86cdf3;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="grid"></div>
+
+    <script>
+        const arabicLetters = [
+            'ر', 'أ', 'ه', 'ب', 'ي',
+            'ز', 'د', 'ق', 'ن', 'ط',
+            'ف', 'ص', 'ع', 'ش', 'م',
+            'ك', 'ل', 'ح', 'ج', 'خ',
+            'س', 'ت', 'ث', 'ذ', 'ض'
+        ];
+        
+        let cells = [];
+        let gameActive = true;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function createGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            cells = [];
+
+            const shuffledLetters = [...arabicLetters];
+            shuffleArray(shuffledLetters);
+
+            // Create beehive rows
+            for (let row = 0; row < 5; row++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+                
+                for (let col = 0; col < 5; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.state = '0';
+                    cell.textContent = shuffledLetters[row * 5 + col];
+                    
+                    cell.addEventListener('click', function() {
+                        if (!gameActive) return;
+                        const currentState = parseInt(this.dataset.state);
+                        const newState = (currentState + 1) % 3;
+                        
+                        this.dataset.state = newState;
+                        this.style.backgroundColor = newState === 1 ? '#4CAF50' : 
+                                                  newState === 2 ? '#f44336' : 'white';
+                        
+                        checkWin();
+                    });
+
+                    rowDiv.appendChild(cell);
+                    cells.push(cell);
+                }
+                grid.appendChild(rowDiv);
+            }
+        }
+
+        function checkWin() {
+            // Check green vertical win
+            for (let col = 0; col < 5; col++) {
+                let greenCount = 0;
+                for (let row = 0; row < 5; row++) {
+                    if (cells[row * 5 + col].dataset.state === '1') greenCount++;
+                }
+                if (greenCount === 5) {
+                    gameActive = false;
+                    return;
+                }
+            }
+
+            // Check red horizontal win
+            for (let row = 0; row < 5; row++) {
+                let redCount = 0;
+                for (let col = 0; col < 5; col++) {
+                    if (cells[row * 5 + col].dataset.state === '2') redCount++;
+                }
+                if (redCount === 5) {
+                    gameActive = false;
+                    return;
+                }
+            }
+        }
+
+        function resetGame() {
+            const shuffledLetters = [...arabicLetters];
+            shuffleArray(shuffledLetters);
+            
+            cells.forEach((cell, index) => {
+                cell.dataset.state = '0';
+                cell.style.backgroundColor = 'white';
+                cell.textContent = shuffledLetters[index];
+            });
+            gameActive = true;
+        }
+
+        // Initial game setup
+        createGrid();
+    </script>
+    <button onclick="resetGame()" style="font-family: Tajawal, sans-serif;">أعد الترتيب</button>
+</body>
+</html>
